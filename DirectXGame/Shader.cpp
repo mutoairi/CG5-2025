@@ -1,6 +1,6 @@
 #include "Shader.h"
-#include<d3dcompiler.h>
-#include<cassert>
+#include <cassert>
+#include <d3dcompiler.h>
 
 void Shader::Load(const std::wstring& filePath, const std::string& shaderModel) {
 	// filePath   :シェーダーのファイルパス
@@ -41,4 +41,3 @@ Shader::~Shader() {
 		blob_ = nullptr;
 	}
 }
-

@@ -1,31 +1,25 @@
 
+#include "Shader.h"
 #include <KamataEngine.h>
 #include <Windows.h>
-#include"Shader.h"
-
-
-
 
 using namespace KamataEngine;
 
+// 関数のプロトタイプ宣言
 
-//関数のプロトタイプ宣言
-
-
-    // Windowsアプリでのエントリーポイント(main関数)
+// Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// エンジンの初期化
 	KamataEngine::Initialize(L"LE3C_25_ムトウ_アイリ_CG5");
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
-	//DirectXCommonが管理しているウィンドウの幅と高さの値を取得
+	// DirectXCommonが管理しているウィンドウの幅と高さの値を取得
 	int32_t w = dxCommon->GetBackBufferWidth();
 	int32_t h = dxCommon->GetBackBufferHeight();
-	DebugText::GetInstance()->ConsolePrintf(std::format("width:{},height:{}\n", w, h). c_str());
+	DebugText::GetInstance()->ConsolePrintf(std::format("width:{},height:{}\n", w, h).c_str());
 
-	//DirectXCommonクラスが管理している、コマンドリストの管理
+	// DirectXCommonクラスが管理している、コマンドリストの管理
 	ID3D12GraphicsCommandList* commandList = dxCommon->GetCommandList();
-
 
 	// RootSignature作成----------------------------------------
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -34,7 +28,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// シリアライズしてバイナリにする
 	ID3DBlob* signatureBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
-    HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
 	if (FAILED(hr)) {
 		DebugText::GetInstance()->ConsolePrintf(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
 		assert(false);
@@ -54,16 +48,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
-	
 
 	// BlendStateの設定------------------------------------------
-	
+
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	
+
 	// RasiterzerStateの設定-------------------------------------
-	
+
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 
 	// 裏面（時計回り）を表示しない
@@ -73,33 +66,29 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//------------------------------------------------------------
-	// 
-	
-	
+	//
 
 	// 頂点シェーダーの読み込みとコンパイル
 	Shader vs;
 	vs.Load(L"Resources/shaders/TestVS.hlsl", "vs_5_0");
 	assert(vs.GetBlob() != nullptr);
-	
+
 	// ピクセルシェーダーの読み込みとコンパイル
 	Shader ps;
 	ps.Load(L"Resources/shaders/TestPS.hlsl", "ps_5_0");
 	assert(ps.GetBlob() != nullptr);
-	
 
+	// PSOの生成-----------------------------------------------
+	//
 
-	//PSOの生成-----------------------------------------------
-	// 
-
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicPipelineStateDesc{};
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicPipelineStateDesc{};
 	graphicPipelineStateDesc.pRootSignature = rootSignature; // RootSignature
 	graphicPipelineStateDesc.InputLayout = inputLayoutDesc;  // InputLayout
 
-	graphicPipelineStateDesc.VS = {vs.GetBlob()->GetBufferPointer(), vs.GetBlob()->GetBufferSize()};         // VertexShader
-	graphicPipelineStateDesc.PS = {ps.GetBlob()->GetBufferPointer(), ps.GetBlob()->GetBufferSize()};         // PixelShader
-	graphicPipelineStateDesc.BlendState = blendDesc;                                                         // BlendDesc
-	graphicPipelineStateDesc.RasterizerState = rasterizerDesc;                                               // RasterizerState
+	graphicPipelineStateDesc.VS = {vs.GetBlob()->GetBufferPointer(), vs.GetBlob()->GetBufferSize()}; // VertexShader
+	graphicPipelineStateDesc.PS = {ps.GetBlob()->GetBufferPointer(), ps.GetBlob()->GetBufferSize()}; // PixelShader
+	graphicPipelineStateDesc.BlendState = blendDesc;                                                 // BlendDesc
+	graphicPipelineStateDesc.RasterizerState = rasterizerDesc;                                       // RasterizerState
 
 	// 書き込むRTVの情報
 	graphicPipelineStateDesc.NumRenderTargets = 1;
@@ -117,8 +106,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	hr = dxCommon->GetDevice()->CreateGraphicsPipelineState(&graphicPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
-
-	//VertexResourceの生成------------------------------------------
+	// VertexResourceの生成------------------------------------------
 
 	// 頂点リソース用のヒープの作成
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
@@ -145,7 +133,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	hr = dxCommon->GetDevice()->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
 	assert(SUCCEEDED(hr));
 
-
 	// 頂点バッファビューを作成する----------------------------------
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -159,7 +146,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	//
 	// 頂点リソースにデータを書き込む-------------------------------------
-	
+
 	Vector4* vertexData = nullptr;
 	// 書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
@@ -172,7 +159,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 右下
 	vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};
 
-	//頂点リソースのマップを解除する
+	// 頂点リソースのマップを解除する
 	vertexResource->Unmap(0, nullptr);
 
 	// メインループ
@@ -182,7 +169,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		if (KamataEngine::Update()) {
 			break;
 		}
-		
 
 		// 描画開始
 		dxCommon->PreDraw();
@@ -196,22 +182,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// 描画！(DrawCall/ドローコール)。3頂点出一つのインスタンス。インスタンスについては今後
 		commandList->DrawInstanced(3, 1, 0, 0);
-		
 
 		// 描画終了
 		dxCommon->PostDraw();
 	}
-	
+
 	vertexResource->Release();
 	graphicsPipelineState->Release();
 	signatureBlob->Release();
 	rootSignature->Release();
-	
+
 	// エンジンの終了処理
 	KamataEngine::Finalize();
 	return 0;
 }
 
 //----------------------　関数　-----------------------------
-
-
