@@ -68,13 +68,18 @@ void Shader::LoadDxc(const std::wstring& filePath, const std::wstring& shaderMod
 	//2.Compileする
 	//Compileに必要なコンパイルオプションの準備
 	LPCWSTR arguments[] = {
-		filePath.c_str(), // コンパイル対象のhlslファイル名
-		L"-E",
-		L"main", // エントリーポイントン指定。基本main以外にしない
-		L"-T", shaderModel.c_str(),//ShaderProfileの設定
-
-
-	}
+	    filePath.c_str(), // コンパイル対象のhlslファイル名
+	    L"-E",
+	    L"main", // エントリーポイントン指定。基本main以外にしない
+	    L"-T",
+	    shaderModel.c_str(), // ShaderProfileの設定
+	    L"-Zi",
+	    L"-Qembed_debug", // デバッグ用の情報を読み込む
+	    L"-Od",           // 最適化を外しておく
+	    L"-Zpr",          // メモリレイアウトは行優先
+	};
+	//実際にシェーダーをコンパイルする
+	IDxcResult* shaderResult = nullptr;
 }
 
 ID3D10Blob* Shader::GetBlob() { return blob_; }
