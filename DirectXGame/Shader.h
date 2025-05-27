@@ -1,9 +1,9 @@
 #pragma once
+#include <d3dcompiler.h>
 #include <d3dx12.h>
+#include <dxcapi.h>
 #include <string>
-#include<d3dcompiler.h>
-#include<dxcapi.h>
-
+#pragma comment(lib, "dxcompiler.lib")
 class Shader {
 public:
 	// シェーダーを読み込みコンパイル済みデータを生成する
