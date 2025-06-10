@@ -1,16 +1,16 @@
 
+#include "PipelineState.h"
+#include "RootSignature.h"
 #include "Shader.h"
-#include"RootSignature.h"
-#include"PipelineState.h"
-#include"VertexBuffer.h"
+#include "VertexBuffer.h"
 #include <KamataEngine.h>
 #include <Windows.h>
 
 using namespace KamataEngine;
 
 // 関数のプロトタイプ宣言
-void SetupPioelineState(PipelineState&pipelineState,RootSignature&rs,Shader&vs,Shader&ps);
-    // Windowsアプリでのエントリーポイント(main関数)
+void SetupPioelineState(PipelineState& pipelineState, RootSignature& rs, Shader& vs, Shader& ps);
+// Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// エンジンの初期化
 	KamataEngine::Initialize(L"LE3C_25_ムトウ_アイリ_CG5");
@@ -40,13 +40,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ps.LoadDxc(L"Resources/shaders/TestPS.hlsl", L"ps_6_0");
 	assert(ps.GetDxcBlob() != nullptr);
 
-	
 	PipelineState pipelineState;
 	SetupPioelineState(pipelineState, rs, vs, ps);
 
-
 	// VertexResourceの生成------------------------------------------
-
 
 	VertexBuffer vb;
 	vb.Create(sizeof(Vector4) * 3, sizeof(Vector4));
@@ -79,9 +76,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		commandList->SetGraphicsRootSignature(rs.Get());
-		commandList->SetPipelineState(pipelineState.Get());     // PSOを設定
+		commandList->SetPipelineState(pipelineState.Get());  // PSOを設定
 		commandList->IASetVertexBuffers(0, 1, vb.GetView()); // VBVを設定
-		                                                          // 形状を設定。PSoに設定しているものとはまた別。同じものを設定すると考えておけばいい
+		                                                     // 形状を設定。PSoに設定しているものとはまた別。同じものを設定すると考えておけばいい
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// 描画！(DrawCall/ドローコール)。3頂点出一つのインスタンス。インスタンスについては今後
@@ -90,7 +87,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// 描画終了
 		dxCommon->PostDraw();
 	}
-
 
 	// エンジンの終了処理
 	KamataEngine::Finalize();
@@ -135,7 +131,7 @@ void SetupPioelineState(PipelineState& pipelineState, RootSignature& rs, Shader&
 	graphicPipelineStateDesc.VS = {vs.GetDxcBlob()->GetBufferPointer(), vs.GetDxcBlob()->GetBufferSize()}; // VertexShader
 	graphicPipelineStateDesc.PS = {ps.GetDxcBlob()->GetBufferPointer(), ps.GetDxcBlob()->GetBufferSize()}; // PixelShader
 	graphicPipelineStateDesc.BlendState = blendDesc;                                                       // BlendDesc
-	graphicPipelineStateDesc.RasterizerState = rasterizerDesc;  // RasterizerState
+	graphicPipelineStateDesc.RasterizerState = rasterizerDesc;                                             // RasterizerState
 
 	// 書き込むRTVの情報
 	graphicPipelineStateDesc.NumRenderTargets = 1;

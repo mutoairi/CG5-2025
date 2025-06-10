@@ -1,9 +1,9 @@
 #include "PipelineState.h"
-#include"KamataEngine.h"
+#include "KamataEngine.h"
 using namespace KamataEngine;
 
 void PipelineState::Create(D3D12_GRAPHICS_PIPELINE_STATE_DESC desc) {
-	DirectXCommon* dxCommon = DirectXCommon::GetInstance(); 
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	// 実際に生成
 	ID3D12PipelineState* graphicsPipelineState = nullptr;
 	HRESULT hr = dxCommon->GetDevice()->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&graphicsPipelineState));

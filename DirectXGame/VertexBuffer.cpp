@@ -1,11 +1,11 @@
 #include "VertexBuffer.h"
-#include"KamataEngine.h"
+#include "KamataEngine.h"
 
-#include<cassert>
+#include <cassert>
 
 using namespace KamataEngine;
 
-void VertexBuffer::Create(const UINT size, const UINT stride) { 
+void VertexBuffer::Create(const UINT size, const UINT stride) {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	// 頂点リソース用のヒープの作成
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
@@ -33,7 +33,6 @@ void VertexBuffer::Create(const UINT size, const UINT stride) {
 	assert(SUCCEEDED(hr));
 	vertexBuffer_ = vertexResource;
 
-	
 	// 頂点バッファビューを作成する----------------------------------
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};

@@ -1,5 +1,5 @@
 #pragma once
-#include<d3d12.h>
+#include <d3d12.h>
 class VertexBuffer {
 public:
 	void Create(const UINT size, const UINT stride);
@@ -9,6 +9,6 @@ public:
 	~VertexBuffer();
 
 private:
-	ID3D12Resource* vertexBuffer_= nullptr;
+	ID3D12Resource* vertexBuffer_ = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 };

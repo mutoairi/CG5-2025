@@ -1,9 +1,9 @@
 #pragma once
 
-#include<string>
+#include <string>
 
-//string→wstring
+// string→wstring
 std::wstring ConvertString(const std::string& str);
 
-//wstring→string
+// wstring→string
 std::string ConvertString(const std::wstring& str);

@@ -1,5 +1,5 @@
 #include "RootSignature.h"
-#include<KamataEngine.h>
+#include <KamataEngine.h>
 using namespace KamataEngine;
 
 void RootSignature::Create() {
