@@ -1,9 +1,9 @@
 
+#include "IndexBuffer.h"
 #include "PipelineState.h"
 #include "RootSignature.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
-#include"IndexBuffer.h"
 #include <KamataEngine.h>
 #include <Windows.h>
 
@@ -49,10 +49,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		Vector4 position;
 	};
 	VertexData vertices[] = {
-	    {0.0f,  0.5f,  0.0f, 1.0f},
-        {0.5f,  -0.5f, 0.0f, 1.0f},
-        {-0.5f, -0.5f, 0.0f, 1.0f}
-    };
+	    {-1.0f, -1.0f, 0.0f, 1.0f}, // 左下
+	    {-1.0f, 1.0f,  0.0f, 1.0f}, // 左上
+	    {1.0f,  -1.0f, 0.0f, 1.0f}, // 右下
+	    {1.0f,  1.0f,  0.0f, 1.0f}, // 右上
+	};
 
 	// VertexResourceの生成------------------------------------------
 
@@ -66,11 +67,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	for (int i = 0; i < _countof(vertices); ++i) {
 		vertexData[i] = vertices[i];
 	}
-
+	//// 頂点リソースのマップを解除する
+	vb.Get()->Unmap(0, nullptr);
 	uint16_t indices[] = {
-	    0,
-	    1,
-	    2,
+	    0, 1, 2, 2, 1, 3,
 	};
 
 	IndexBuffer ib;
@@ -81,17 +81,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	for (int i = 0; i < _countof(indices); ++i) {
 		pGpuIndices[i] = indices[i];
 	}
+	ib.Get()->Unmap(0, nullptr);
 	//// 左下
-	//vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
+	// vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
 
 	//// 上
-	//vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};
+	// vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};
 
 	//// 右下
-	//vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};
-
-	//// 頂点リソースのマップを解除する
-	//vb.Get()->Unmap(0, nullptr);
+	// vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};
 
 	// メインループ
 	while (true) {
@@ -108,13 +106,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		commandList->SetGraphicsRootSignature(rs.Get());
 		commandList->SetPipelineState(pipelineState.Get());  // PSOを設定
 		commandList->IASetVertexBuffers(0, 1, vb.GetView()); // VBVを設定
-		commandList->IASetIndexBuffer(ib.GetView());//IBVを設定
-		                                                     // 形状を設定。PSoに設定しているものとはまた別。同じものを設定すると考えておけばいい
+		commandList->IASetIndexBuffer(ib.GetView());         // IBVを設定
+		                                             //  形状を設定。PSoに設定しているものとはまた別。同じものを設定すると考えておけばいい
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// 描画！(DrawCall/ドローコール)。3頂点出一つのインスタンス。インスタンスについては今後
 		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
-		//commandList->DrawInstanced(3, 1, 0, 0);
+		// commandList->DrawInstanced(3, 1, 0, 0);
 
 		// 描画終了
 		dxCommon->PostDraw();

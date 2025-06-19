@@ -1,5 +1,5 @@
 #pragma once
-#include"d3d12.h"
+#include "d3d12.h"
 class IndexBuffer {
 public:
 	void Create(const UINT size, const UINT stride);
