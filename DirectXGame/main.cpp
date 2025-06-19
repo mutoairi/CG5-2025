@@ -3,6 +3,7 @@
 #include "RootSignature.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
+#include"IndexBuffer.h"
 #include <KamataEngine.h>
 #include <Windows.h>
 
@@ -10,6 +11,7 @@ using namespace KamataEngine;
 
 // 関数のプロトタイプ宣言
 void SetupPioelineState(PipelineState& pipelineState, RootSignature& rs, Shader& vs, Shader& ps);
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// エンジンの初期化
@@ -43,25 +45,53 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	PipelineState pipelineState;
 	SetupPioelineState(pipelineState, rs, vs, ps);
 
+	struct VertexData {
+		Vector4 position;
+	};
+	VertexData vertices[] = {
+	    {0.0f,  0.5f,  0.0f, 1.0f},
+        {0.5f,  -0.5f, 0.0f, 1.0f},
+        {-0.5f, -0.5f, 0.0f, 1.0f}
+    };
+
 	// VertexResourceの生成------------------------------------------
 
 	VertexBuffer vb;
-	vb.Create(sizeof(Vector4) * 3, sizeof(Vector4));
+	vb.Create(sizeof(vertices) * 3, sizeof(vertices[0]));
 
-	Vector4* vertexData = nullptr;
+	VertexData* vertexData = nullptr;
 	// 書き込むためのアドレスを取得
 	vb.Get()->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	// 左下
-	vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
 
-	// 上
-	vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};
+	for (int i = 0; i < _countof(vertices); ++i) {
+		vertexData[i] = vertices[i];
+	}
 
-	// 右下
-	vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};
+	uint16_t indices[] = {
+	    0,
+	    1,
+	    2,
+	};
 
-	// 頂点リソースのマップを解除する
-	vb.Get()->Unmap(0, nullptr);
+	IndexBuffer ib;
+	ib.Create(sizeof(indices), sizeof(indices[0]));
+
+	uint16_t* pGpuIndices = nullptr;
+	ib.Get()->Map(0, nullptr, reinterpret_cast<void**>(&pGpuIndices));
+	for (int i = 0; i < _countof(indices); ++i) {
+		pGpuIndices[i] = indices[i];
+	}
+	//// 左下
+	//vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
+
+	//// 上
+	//vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};
+
+	//// 右下
+	//vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};
+
+	//// 頂点リソースのマップを解除する
+	//vb.Get()->Unmap(0, nullptr);
 
 	// メインループ
 	while (true) {
@@ -78,11 +108,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		commandList->SetGraphicsRootSignature(rs.Get());
 		commandList->SetPipelineState(pipelineState.Get());  // PSOを設定
 		commandList->IASetVertexBuffers(0, 1, vb.GetView()); // VBVを設定
+		commandList->IASetIndexBuffer(ib.GetView());//IBVを設定
 		                                                     // 形状を設定。PSoに設定しているものとはまた別。同じものを設定すると考えておけばいい
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// 描画！(DrawCall/ドローコール)。3頂点出一つのインスタンス。インスタンスについては今後
-		commandList->DrawInstanced(3, 1, 0, 0);
+		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
+		//commandList->DrawInstanced(3, 1, 0, 0);
 
 		// 描画終了
 		dxCommon->PostDraw();
