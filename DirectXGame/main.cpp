@@ -47,13 +47,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	struct VertexData {
 		Vector4 position;
-		
+		Vector2 texcoord;
 	};
 	VertexData vertices[] = {
-	    {-1.0f, -1.0f, 0.0f, 1.0f}, // 左下
-	    {-1.0f, 1.0f,  0.0f, 1.0f}, // 左上
-	    {1.0f,  -1.0f, 0.0f, 1.0f}, // 右下
-	    {1.0f,  1.0f,  0.0f, 1.0f}, // 右上
+	    {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // 左下
+	    {{-1.0f, 1.0f, 0.0f, 1.0f},  {1.0f, 1.0f}}, // 左上
+	    {{1.0f, -1.0f, 0.0f, 1.0f},  {0.0f, 0.0f}}, // 右下
+	    {{1.0f, 1.0f, 0.0f, 1.0f},   {1.0f, 0.0f}}  // 右上
 	};
 
 	// VertexResourceの生成------------------------------------------
@@ -108,7 +108,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		commandList->SetPipelineState(pipelineState.Get());  // PSOを設定
 		commandList->IASetVertexBuffers(0, 1, vb.GetView()); // VBVを設定
 		commandList->IASetIndexBuffer(ib.GetView());         // IBVを設定
-		                                             //  形状を設定。PSoに設定しているものとはまた別。同じものを設定すると考えておけばいい
+		                                                     //  形状を設定。PSoに設定しているものとはまた別。同じものを設定すると考えておけばいい
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// 描画！(DrawCall/ドローコール)。3頂点出一つのインスタンス。インスタンスについては今後
@@ -128,11 +128,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 void SetupPioelineState(PipelineState& pipelineState, RootSignature& rs, Shader& vs, Shader& ps) {
 	// InputLayout----------------------------------------------
 
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[1] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs[1].SemanticName = "TEXCOORD";
+	inputElementDescs[1].SemanticIndex = 0;
+	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
