@@ -47,6 +47,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	struct VertexData {
 		Vector4 position;
+		
 	};
 	VertexData vertices[] = {
 	    {-1.0f, -1.0f, 0.0f, 1.0f}, // 左下
