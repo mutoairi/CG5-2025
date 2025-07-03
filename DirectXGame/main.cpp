@@ -11,6 +11,7 @@ using namespace KamataEngine;
 
 // 関数のプロトタイプ宣言
 void SetupPioelineState(PipelineState& pipelineState, RootSignature& rs, Shader& vs, Shader& ps);
+//RenderTextureResourceの作成
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
