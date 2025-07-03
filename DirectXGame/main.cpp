@@ -12,6 +12,7 @@ using namespace KamataEngine;
 // 関数のプロトタイプ宣言
 void SetupPioelineState(PipelineState& pipelineState, RootSignature& rs, Shader& vs, Shader& ps);
 //RenderTextureResourceの作成
+ID3D12Resource* CreateRenderTextureResource(ID3D12Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format, const FLOAT* clearColor);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -181,4 +182,12 @@ void SetupPioelineState(PipelineState& pipelineState, RootSignature& rs, Shader&
 	graphicPipelineStateDesc.SampleDesc.Count = 1;
 	graphicPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 	pipelineState.Create(graphicPipelineStateDesc);
+}
+
+ID3D12Resource* CreateRenderTextureResource(ID3D12Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format, const FLOAT* clearColor) { 
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Width = UINT(width);
+	resourceDesc.Height = UINT(height);
+	resourceDesc.MipLevels = 1;
+	resourceDesc.DepthOrArraySize = 1;
 }
