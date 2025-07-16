@@ -4,6 +4,7 @@
 #include "RootSignature.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
+#include"WorldTransformEx.h"
 #include <KamataEngine.h>
 #include <Windows.h>
 
@@ -151,6 +152,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	srvDesc.Texture2D.MipLevels = 1;
 
 	device->CreateShaderResourceView(renderTextureResource, &srvDesc, srvHandleCPU);
+
+
+	///アプリで利用する3Dモデル＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+	Model* model = Model::CreateFromOBJ("terrain");
+
+	WorldTransformEx worldTransform;
+	worldTransform.Initialize();
+	worldTransform.scale_ = Vector3(1.0f, 1.0f, 1.0f);
+	
+	Camera camera;
+	camera.Initialize();
+	camera.translation_ = Vector3(0.0f, 1.0f, 0.0f);
 	// メインループ
 	while (true) {
 
@@ -158,6 +171,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		if (KamataEngine::Update()) {
 			break;
 		}
+
+		//World変換行列の定数バッファへの転送
+		worldTransform.rotation_.y += 0.005f;
+		worldTransform.UpdateMatrix();
+
+		camera.UpdateMatrix();
 
 		// 描画開始
 		D3D12_RESOURCE_BARRIER barrier{};
@@ -189,7 +208,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		commandList->ClearRenderTargetView(rtvHandleCPU, kRenderTargetClearColor, 0, nullptr);
 		commandList->ClearDepthStencilView(dsvHandleCPU, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		Model::PreDraw(commandList);
+		model->Draw(worldTransform, camera);
+		Model::PostDraw();
+		
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = renderTextureResource;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		commandList->ResourceBarrier(1, &barrier);
+
+
 		dxCommon->PreDraw();
+
+	
 
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		commandList->SetGraphicsRootSignature(rs.Get());
@@ -201,21 +234,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		commandList->SetDescriptorHeaps(srvDescriptorHeap->GetDesc().NumDescriptors, &srvDescriptorHeap);
 		commandList->SetGraphicsRootDescriptorTable(0, srvHandleGPU);
 
+		
 		// 描画！(DrawCall/ドローコール)。3頂点出一つのインスタンス。インスタンスについては今後
 		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
 		// commandList->DrawInstanced(3, 1, 0, 0);
 
+		
+
 		// 描画終了
 		dxCommon->PostDraw();
-
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = renderTextureResource;
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		commandList->ResourceBarrier(1, &barrier);
+		
+		
 	}
 
+	delete model;
 	renderTextureResource->Release();
 	srvDescriptorHeap->Release();
 	rtvDescriptorHeap->Release();
